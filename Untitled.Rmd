@@ -127,6 +127,27 @@ ttext.df <- data.frame(word = names(twords),freq=twords)
 wordcloud2(data=ttext.df, size = 0.20, shape="ellipse")
 ```
 
+## Sentiment Analysis for each Country
+
+```{r bahamas sentiment }
+#Get sentiments and add to table
+bsent <- get_nrc_sentiment(baha$ReviewText)
+bvibes <- cbind(baha, bsent)
+head(bvibes)
+```
+```{r jamaica sentiment }
+#Get sentiments and add to table
+jsent <- get_nrc_sentiment(jam$ReviewText)
+jvibes <- cbind(jam, jsent)
+head(jvibes)
+```
+```{r trinidad sentiment }
+#Get sentiments and add to table
+tsent <- get_nrc_sentiment(trini$ReviewText)
+tvibes <- cbind(trini, tsent)
+head(tvibes)
+```
+
 ```{r}
 the_tweets.df = read.csv("sales_data03.csv", stringsAsFactors = FALSE)
 ```
