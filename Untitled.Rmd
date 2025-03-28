@@ -63,6 +63,10 @@ baha_rev <- baha$ReviewText
 #Convert to corpus and convert to lowercase
 btext <- Corpus(VectorSource(baha_rev))
 btext <- tm_map(btext, content_transformer(tolower))
+
+
+#Remove stopwords
+btext <- tm_map(btext, removeWords, c(stopwords("english"), "and", "or"))
 ```
 # Jamaica 
 
@@ -73,6 +77,10 @@ jam_rev <- jam$ReviewText
 #Convert to corpus and convert to lowercase
 jtext <- Corpus(VectorSource(jam_rev))
 jtext <- tm_map(jtext, content_transformer(tolower))
+
+
+#Remove stopwords
+jtext <- tm_map(jtext, removeWords, c(stopwords("english"), "and", "or"))
 ```
 # Trinidad
 ```{r Trinidad}
@@ -83,6 +91,9 @@ head(trini_rev)
 #Convert to corpus and convert to lowercase
 ttext <- Corpus(VectorSource(trini_rev))
 ttext <- tm_map(ttext, content_transformer(tolower))
+
+#Remove stopwords
+ttext <- tm_map(ttext, removeWords, c(stopwords("english"), "and", "or"))
 ```
 
 ```{r}
