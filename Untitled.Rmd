@@ -33,6 +33,8 @@ library(RColorBrewer)
 
 ```
 ## Part 1
+
+First we will load in traveler data, and create dataframes for three Caribbean countries: Jamaica, The Bahamas and Trinidad and Tobego
 ```{r load data}
 
 #Clean up data
@@ -51,10 +53,37 @@ head(baha)
 trini <- subset(tdata, Country == "Trinidad and Tobago")
 head(trini)
 ```
+## Wordclouds
 
+# The Bahamas
+```{r Bahamas wordcloud}
+#Get reviews for wordclouds
+baha_rev <- baha$ReviewText
 
+#Convert to corpus and convert to lowercase
+btext <- Corpus(VectorSource(baha_rev))
+btext <- tm_map(btext, content_transformer(tolower))
+```
+# Jamaica 
 
+```{r Jamaica wordcloud}
+#Get reviews for wordclouds
+jam_rev <- jam$ReviewText
 
+#Convert to corpus and convert to lowercase
+jtext <- Corpus(VectorSource(jam_rev))
+jtext <- tm_map(jtext, content_transformer(tolower))
+```
+# Trinidad
+```{r Trinidad}
+#Get reviews for wordclouds
+trini_rev <- trini$ReviewText
+head(trini_rev)
+
+#Convert to corpus and convert to lowercase
+ttext <- Corpus(VectorSource(trini_rev))
+ttext <- tm_map(ttext, content_transformer(tolower))
+```
 
 ```{r}
 the_tweets.df = read.csv("sales_data03.csv", stringsAsFactors = FALSE)
