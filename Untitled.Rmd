@@ -34,3 +34,14 @@ options(scipen=9999)
 tdata <- read.csv("traveler_reviews.csv")
 head(tdata)
 ```
+
+
+
+
+
+```{r}
+the_tweets.df = read.csv("sales_data03.csv", stringsAsFactors = FALSE)
+```
+
+
+
