@@ -4,6 +4,14 @@ output: html_document
 date: "2025-03-28"
 ---
 
+## Project Overview
+
+A new lifestyle and retail brand has approached you to help them assess data related to buying patterns
+in different countries. They are in an expansion mode and would like to present some findings to their
+investment board regarding the pros and cons related to some key products that they carry. They are
+also interested also in understanding perspectives from travelers in specified countries to enhance their
+understanding of how to approach a key segment of their market, vacationers
+
 ```{r setup}
 #install.packages(c("dplyr", "tidyr", "ggplot2", "plotly", "tm"))
 #install.packages("corrplot")
@@ -15,4 +23,14 @@ library(plotly)
 library(tm)
 library(corrplot)
 
+
+```
+## Part 1
+```{r load data}
+
+rm(list=ls())
+options(scipen=9999)
+
+tdata <- read.csv("traveler_reviews.csv")
+head(tdata)
 ```
