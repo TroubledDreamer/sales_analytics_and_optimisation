@@ -66,7 +66,7 @@ btext <- tm_map(btext, content_transformer(tolower))
 
 
 #Remove stopwords
-btext <- tm_map(btext, removeWords, c(stopwords("english"), "and", "or"))
+btext <- tm_map(btext, removeWords, c(stopwords("english"), "and", "or","hotel"))
 
 
 #Create wordcloud
@@ -91,7 +91,7 @@ jtext <- Corpus(VectorSource(jam_rev))
 jtext <- tm_map(jtext, content_transformer(tolower))
 
 #Remove stopwords
-jtext <- tm_map(jtext, removeWords, c(stopwords("english"), "and", "or"))
+jtext <- tm_map(jtext, removeWords, c(stopwords("english"), "and", "or","hotel"))
 
 #Create wordcloud
 jtext.dtm <- TermDocumentMatrix(jtext)
@@ -114,7 +114,7 @@ ttext <- Corpus(VectorSource(trini_rev))
 ttext <- tm_map(ttext, content_transformer(tolower))
 
 #Remove stopwords
-ttext <- tm_map(ttext, removeWords, c(stopwords("english"), "and", "or"))
+ttext <- tm_map(ttext, removeWords, c(stopwords("english"), "and", "or","hotel"))
 
 #Create wordcloud
 ttext.dtm <- TermDocumentMatrix(ttext)
