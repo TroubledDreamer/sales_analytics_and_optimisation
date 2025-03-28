@@ -28,11 +28,21 @@ library(corrplot)
 ## Part 1
 ```{r load data}
 
+#Clean up data
 rm(list=ls())
 options(scipen=9999)
 
+#Load in traveler data
 tdata <- read.csv("traveler_reviews.csv")
-head(tdata)
+head(tdata, 20)
+
+#Create subsets of the data for Jamaica, The Bahamas and Trinidad
+jam <- subset(tdata, Country == "Jamaica")
+head(jam)
+baha <- subset(tdata, Country == "The Bahamas")
+head(baha)
+trini <- subset(tdata, Country == "Trinidad and Tobago")
+head(trini)
 ```
 
 
