@@ -4,4 +4,15 @@ output: html_document
 date: "2025-03-28"
 ---
 
+```{r setup}
+#install.packages(c("dplyr", "tidyr", "ggplot2", "plotly", "tm"))
+#install.packages("corrplot")
 
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(tm)
+library(corrplot)
+
+```
