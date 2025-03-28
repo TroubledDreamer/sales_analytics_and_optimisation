@@ -126,6 +126,8 @@ twords <- sort(rowSums(ttext.matrix), decreasing=TRUE)
 ttext.df <- data.frame(word = names(twords),freq=twords)
 wordcloud2(data=ttext.df, size = 0.20, shape="ellipse")
 ```
+## Wordcloud Comparisons
+Based on the word clouds, it is apparent that most reviews for Jamaica and Trinidad and Tobego are about the hotel room, since the largest word in their wordclouds is "room". On the other hand, most reviews in the Bahamas discuss "breakfast"
 
 ## Sentiment Analysis for each Country
 
