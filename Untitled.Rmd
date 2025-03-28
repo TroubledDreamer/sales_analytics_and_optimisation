@@ -1,0 +1,7 @@
+---
+title: "Assignment02"
+output: html_document
+date: "2025-03-28"
+---
+
+
