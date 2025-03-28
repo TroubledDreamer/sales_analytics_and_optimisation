@@ -67,6 +67,18 @@ btext <- tm_map(btext, content_transformer(tolower))
 
 #Remove stopwords
 btext <- tm_map(btext, removeWords, c(stopwords("english"), "and", "or"))
+
+
+#Create wordcloud
+btext.dtm <- TermDocumentMatrix(btext)
+
+btext.matrix <- as.matrix(btext.dtm)
+
+bwords <- sort(rowSums(btext.matrix), decreasing=TRUE)
+
+btext.df <- data.frame(word = names(bwords),freq=bwords)
+wordcloud2(data=btext.df, size = 0.20, shape="ellipse")
+
 ```
 # Jamaica 
 
@@ -78,9 +90,18 @@ jam_rev <- jam$ReviewText
 jtext <- Corpus(VectorSource(jam_rev))
 jtext <- tm_map(jtext, content_transformer(tolower))
 
-
 #Remove stopwords
 jtext <- tm_map(jtext, removeWords, c(stopwords("english"), "and", "or"))
+
+#Create wordcloud
+jtext.dtm <- TermDocumentMatrix(jtext)
+
+jtext.matrix <- as.matrix(jtext.dtm)
+
+jwords <- sort(rowSums(jtext.matrix), decreasing=TRUE)
+
+jtext.df <- data.frame(word = names(jwords),freq=jwords)
+wordcloud2(data=jtext.df, size = 0.20, shape="ellipse")
 ```
 # Trinidad
 ```{r Trinidad}
@@ -94,6 +115,16 @@ ttext <- tm_map(ttext, content_transformer(tolower))
 
 #Remove stopwords
 ttext <- tm_map(ttext, removeWords, c(stopwords("english"), "and", "or"))
+
+#Create wordcloud
+ttext.dtm <- TermDocumentMatrix(ttext)
+
+ttext.matrix <- as.matrix(ttext.dtm)
+
+twords <- sort(rowSums(ttext.matrix), decreasing=TRUE)
+
+ttext.df <- data.frame(word = names(twords),freq=twords)
+wordcloud2(data=ttext.df, size = 0.20, shape="ellipse")
 ```
 
 ```{r}
