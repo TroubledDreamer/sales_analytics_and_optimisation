@@ -38,10 +38,586 @@ head(tdata)
 
 
 
+```{r}
+sales.df <- read.csv("sales_data03.csv", stringsAsFactors = FALSE)
+```
+
+#Data Cleaning
+```{r}
+#Step 1 - Removing empty rows
+noNARow <- sales.df[rowSums(is.na(sales.df[, -1]) | sales.df[, -1] == "" | sales.df[, -1] == "k") != (ncol(sales.df) - 1), ]
+
+```
+
+
+
+#Step 2 - 
+```{r}
+#
+uniqueValues <- unique(noNARow[,"Region"])
+print(uniqueValues)
+
+validPlaces <- c("Sub-Saharan Africa", "Asia" , "Europe" , "Australia and Oceania", "Central America and the Caribbean",
+                 "Middle East and North Africa", "North America")
+
+print(validPlaces)
+```
 
 ```{r}
-the_tweets.df = read.csv("sales_data03.csv", stringsAsFactors = FALSE)
+#
+noNARow$Country <- trimws(noNARow$Country) #removing extra space at the end of countries
+uniqueValues <- unique(noNARow[,"Country"])
+print(uniqueValues)
 ```
+
+
+```{r}
+countryRegionMap <- c(
+  "Lesotho" = "Sub-Saharan Africa", "Indonesia" = "Asia", "Norway" = "Europe",
+  "Latvia" = "Europe", "Uzbekistan" = "Asia", "Papua New Guinea" = "Australia and Oceania",
+  "Serbia" = "Europe", "Panama" = "Central America and the Caribbean", "Jamaica" = "Central America and the Caribbean",
+  "Brunei" = "Asia", "Senegal" = "Sub-Saharan Africa", "San Marino" = "Europe",
+  "Vanuatu" = "Australia and Oceania", "East Timor" = "Asia", "Slovenia" = "Europe",
+  "Slovakia" = "Europe", "Croatia" = "Europe", "Niger" = "Sub-Saharan Africa",
+  "Austria" = "Europe", "Tanzania" = "Sub-Saharan Africa", "Eritrea" = "Sub-Saharan Africa",
+  "Luxembourg" = "Europe", "Sao Tome and Principe" = "Sub-Saharan Africa", "Mali" = "Sub-Saharan Africa",
+  "Kuwait" = "Middle East and North Africa", "Tuvalu" = "Australia and Oceania", "Saudi Arabia" = "Middle East and North Africa",
+  "Cambodia" = "Asia", "Kyrgyzstan" = "Asia", "Central African Republic" = "Sub-Saharan Africa",
+  "Denmark" = "Europe", "Madagascar" = "Sub-Saharan Africa", "Hungary" = "Europe",
+  "United Kingdom" = "Europe", "Ethiopia" = "Sub-Saharan Africa", "South Korea" = "Asia",
+  "Mexico" = "North America", "United Arab Emirates" = "Middle East and North Africa",
+  "Sweden" = "Europe", "Syria" = "Middle East and North Africa", "Mauritius" = "Sub-Saharan Africa",
+  "Honduras" = "Central America and the Caribbean", "Comoros" = "Sub-Saharan Africa",
+  "Mozambique" = "Sub-Saharan Africa", "Qatar" = "Middle East and North Africa",
+  "Vietnam" = "Asia", "Sri Lanka" = "Asia", "Bosnia and Herzegovina" = "Europe",
+  "Costa Rica" = "Central America and the Caribbean", "Cape Verde" = "Sub-Saharan Africa",
+  "Japan" = "Asia", "Italy" = "Europe", "Samoa" = "Australia and Oceania",
+  "Guatemala" = "Central America and the Caribbean", "South Africa" = "Sub-Saharan Africa",
+  "Barbados" = "Central America and the Caribbean", "Portugal" = "Europe",
+  "Swaziland" = "Sub-Saharan Africa", "Mauritania" = "Sub-Saharan Africa",
+  "New Zealand" = "Australia and Oceania", "Belize" = "Central America and the Caribbean",
+  "Tonga" = "Australia and Oceania", "Georgia" = "Europe", "Taiwan" = "Asia",
+  "Bhutan" = "Asia", "Kenya" = "Sub-Saharan Africa", "Algeria" = "Middle East and North Africa",
+  "Kiribati" = "Australia and Oceania", "Palau" = "Australia and Oceania",
+  "Sierra Leone" = "Sub-Saharan Africa", "Bangladesh" = "Asia", "Thailand" = "Asia",
+  "Yemen" = "Middle East and North Africa", "Afghanistan" = "Asia",
+  "Trinidad and Tobago" = "Central America and the Caribbean",
+  "United States of America" = "North America", "Germany" = "Europe",
+  "Andorra" = "Europe", "Turkey" = "Asia", "Singapore" = "Asia",
+  "Switzerland" = "Europe", "France" = "Europe", "Uganda" = "Sub-Saharan Africa",
+  "Liberia" = "Sub-Saharan Africa", "Kosovo" = "Europe", "Macedonia" = "Europe",
+  "Equatorial Guinea" = "Sub-Saharan Africa", "Solomon Islands" = "Australia and Oceania",
+  "Turkmenistan" = "Asia", "Belarus" = "Europe", "Netherlands" = "Europe",
+  "Romania" = "Europe", "Russia" = "Europe", "Togo" = "Sub-Saharan Africa",
+  "Lebanon" = "Middle East and North Africa", "Bulgaria" = "Europe",
+  "Cyprus" = "Europe", "Australia" = "Australia and Oceania", "Monaco" = "Europe",
+  "Malawi" = "Sub-Saharan Africa", "Saint Lucia" = "Central America and the Caribbean",
+  "Montenegro" = "Europe", "Sudan" = "Sub-Saharan Africa", "Nauru" = "Australia and Oceania",
+  "Zambia" = "Sub-Saharan Africa", "Kazakhstan" = "Asia", "Oman" = "Middle East and North Africa",
+  "Vatican City" = "Europe", "Chad" = "Sub-Saharan Africa", "Armenia" = "Asia",
+  "Belgium" = "Europe", "Antigua and Barbuda" = "Central America and the Caribbean",
+  "Myanmar" = "Asia", "Iraq" = "Middle East and North Africa",
+  "Burundi" = "Sub-Saharan Africa", "Finland" = "Europe", "Tajikistan" = "Asia",
+  "Cuba" = "Central America and the Caribbean", "Dominica" = "Central America and the Caribbean",
+  "Czech Republic" = "Europe", "Poland" = "Europe", "Malaysia" = "Asia",
+  "Greenland" = "North America", "Benin" = "Sub-Saharan Africa", "Azerbaijan" = "Asia",
+  "Iran" = "Middle East and North Africa", "Mongolia" = "Asia",
+  "Lithuania" = "Europe", "Guinea" = "Sub-Saharan Africa",
+  "Estonia" = "Europe", "Tunisia" = "Middle East and North Africa",
+  "Saint Vincent and the Grenadines" = "Central America and the Caribbean",
+  "North Korea" = "Asia", "Malta" = "Europe", "Liechtenstein" = "Europe",
+  "The Bahamas" = "Central America and the Caribbean", "Ukraine" = "Europe",
+  "Federated States of Micronesia" = "Australia and Oceania",
+  "South Sudan" = "Sub-Saharan Africa", "Moldova" = "Europe",
+  "Philippines" = "Asia", "The Gambia" = "Sub-Saharan Africa",
+  "Israel" = "Middle East and North Africa", "Burkina Faso" = "Sub-Saharan Africa",
+  "Djibouti" = "Sub-Saharan Africa", "Bahrain" = "Middle East and North Africa",
+  "Botswana" = "Sub-Saharan Africa", "Haiti" = "Central America and the Caribbean",
+  "Somalia" = "Sub-Saharan Africa", "Namibia" = "Sub-Saharan Africa",
+  "Marshall Islands" = "Australia and Oceania", "Greece" = "Europe",
+  "Spain" = "Europe", "Saint Kitts and Nevis" = "Central America and the Caribbean",
+  "Seychelles" = "Sub-Saharan Africa", "Dominican Republic" = "Central America and the Caribbean",
+  "Albania" = "Europe", "Rwanda" = "Sub-Saharan Africa", "Gabon" = "Sub-Saharan Africa",
+  "Canada" = "North America", "Ghana" = "Sub-Saharan Africa",
+  "Morocco" = "Middle East and North Africa", "Guinea-Bissau" = "Sub-Saharan Africa",
+  "Ireland" = "Europe", "India" = "Asia", "Democratic Republic of the Congo" = "Sub-Saharan Africa",
+  "Iceland" = "Europe", "Pakistan" = "Asia", "Laos" = "Asia",
+  "Cameroon" = "Sub-Saharan Africa", "Cote d'Ivoire" = "Sub-Saharan Africa",
+  "Grenada" = "Central America and the Caribbean", "Maldives" = "Asia",
+  "Nepal" = "Asia", "Fiji" = "Australia and Oceania", "Nicaragua" = "Central America and the Caribbean",
+  "Jordan" = "Middle East and North Africa", "El Salvador" = "Central America and the Caribbean",
+  "Egypt" = "Middle East and North Africa", "Republic of the Congo" = "Sub-Saharan Africa",
+  "Angola" = "Sub-Saharan Africa", "Zimbabwe" = "Sub-Saharan Africa", 
+  "Nigeria" = "Sub-Saharan Africa"
+)
+```
+
+
+```{r}
+fixedCountries <- noNARow
+fixedCountries$Region <- ifelse(noNARow$Region %in% validPlaces, noNARow$Region, countryRegionMap[noNARow$Country])
+
+uniqueValues <- unique(fixedCountries[,"Region"])
+print(uniqueValues)
+```
+
+
+
+#Step 3 - X
+```{r}
+#Note - None is one of the options
+uniqueValues <- unique(fixedCountries[,"X"])
+print(uniqueValues)
+```
+
+#Step 4 - Sales.Channel
+```{r}
+#Note - Yes is one of the options
+uniqueValues <- unique(fixedCountries[,"Sales.Channel"])
+print(uniqueValues)
+fixedCountries[fixedCountries$Sales.Channel == "", ]
+
+```
+
+```{r}
+
+
+
+
+# Print the unique values in the Sales.Channel column to check
+uniqueValue <- unique(fixedCountries[,"Sales.Channel"])
+print(uniqueValue)
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+library(dplyr)
+
+# Convert to lowercase to avoid case issues
+fixedCountries$Sales.Channel <- tolower(fixedCountries$Sales.Channel)
+
+# Replace only incorrect values ("yes" and "") with NA, keeping "online" and "offline"
+fixedCountries$Sales.Channel <- ifelse(fixedCountries$Sales.Channel %in% c("yes", ""), NA, fixedCountries$Sales.Channel)
+
+# Ensure Sales.Channel is a factor
+fixedCountries$Sales.Channel <- factor(fixedCountries$Sales.Channel, levels = c("offline", "online"))
+
+# ✅ Check the data before modeling
+print(table(fixedCountries$Sales.Channel, useNA = "always"))
+
+# Only run the model if there are enough unique values
+train_data <- fixedCountries %>% filter(!is.na(Sales.Channel))
+
+if (length(unique(train_data$Sales.Channel)) > 1) {
+    # Train logistic regression model
+    model <- glm(Sales.Channel ~ Country + X, data = train_data, family = binomial, na.action = na.exclude)
+
+    # Identify missing values
+    missing_indices <- which(is.na(fixedCountries$Sales.Channel))
+    fixedCountries$PredictedProb <- predict(model, newdata = fixedCountries, type = "response")
+
+    # Replace missing values based on predicted probability
+    fixedCountries$Sales.Channel[missing_indices] <- ifelse(fixedCountries$PredictedProb[missing_indices] > 0.5, "online", "offline")
+
+    # Convert to factor again
+    fixedCountries$Sales.Channel <- factor(fixedCountries$Sales.Channel, levels = c("offline", "online"))
+
+    # Remove the PredictedProb column
+    fixedCountries <- fixedCountries %>% select(-PredictedProb)
+} else {
+    warning("Not enough unique levels in Sales.Channel to fit the model. Check data cleaning steps!")
+}
+
+# ✅ Check the cleaned data
+print(table(fixedCountries$Sales.Channel, useNA = "always"))
+
+
+
+
+```
+
+```{r}
+
+print(table(fixedCountries$Order.Priority, useNA = "always"))
+
+```
+
+
+```{r}
+fixedCountries$Order.Date <- as.Date(fixedCountries$Order.Date, format="%m/%d/%Y")
+fixedCountries$Ship.Date <- as.Date(fixedCountries$Ship.Date, format="%m/%d/%Y")
+
+all(fixedCountries$Order.Date <= fixedCountries$Ship.Date)
+
+
+#invalid_rows <- fixedCountries[fixedCountries$Order.Date > fixedCountries$Ship.Date, ]
+
+# Print the problematic rows
+#print(invalid_rows)
+```
+
+
+
+```{r}
+summary(fixedCountries$Region)
+uniqueValues <- unique(fixedCountries[,"Region"])
+print(uniqueValues)
+```
+
+```{r}
+product_counts <- fixedCountries %>%
+  count(Region) 
+
+ggplot(product_counts, aes(x = reorder(Region, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(
+    title = "Frequency of Region",
+    x = "Count",
+    y = "Region"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-labels
+```
+
+
+
+#-----------------------------------------------
+
+```{r}
+summary(fixedCountries$Country)
+uniqueValues <- unique(fixedCountries[,"Country"])
+print(uniqueValues)
+
+```
+
+
+```{r}
+
+top_countries <- fixedCountries %>%
+  count(Country) %>%
+  top_n(10, n) 
+
+ggplot(top_countries, aes(x = reorder(Country, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Top 10 Countries by Sales Frequency", x = "Country", y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+
+
+
+
+#---------------------------------
+
+```{r}
+summary(fixedCountries$X)
+uniqueValues <- unique(fixedCountries[,"X"])
+print(uniqueValues)
+```
+
+```{r}
+product_counts <- fixedCountries %>%
+  count(X) 
+
+ggplot(product_counts, aes(x = reorder(X, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(
+    title = "Frequency of Product Types (X)",
+    x = "Product Type",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-labels
+```
+
+
+
+
+#----------------------------------
+
+
+```{r}
+summary(fixedCountries$Sales.Channel)
+uniqueValues <- unique(fixedCountries[,"Sales.Channel"])
+print(uniqueValues)
+
+
+```
+```{r}
+
+channel_counts <- fixedCountries %>%
+  count(Sales.Channel) %>%
+  arrange(desc(n))  # Sort by frequency (descending)
+
+ggplot(channel_counts, aes(x = Sales.Channel, y = n)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  labs(title = "Frequency of Sales by Channel", x = "Sales Channel", y = "Count") +
+  theme_minimal()
+```
+
+
+#-------------------------------
+
+```{r}
+summary(fixedCountries$Order.Priority)
+uniqueValues <- unique(fixedCountries[,"Order.Priority"])
+print(uniqueValues)
+```
+
+```{r}
+channel_counts <- fixedCountries %>%
+  count(Order.Priority) %>%
+  arrange(desc(n))  # Sort by frequency (descending)
+
+ggplot(channel_counts, aes(x = Order.Priority, y = n)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  labs(title = "Frequency of Sales by Channel", x = "Order.Priority", y = "Count") +
+  theme_minimal()
+```
+
+#----------------------------------
+
+```{r}
+summary(fixedCountries$Order.Date)
+
+
+```
+
+```{r}
+ggplot(fixedCountries, aes(x = Order.Date)) +
+  geom_line(stat = "count", color = "red", linewidth = .05) +  # Count orders per date
+  labs(
+    title = "Orders Over Time (Check for Gaps/Spikes)",
+    x = "Order Date",
+    y = "Number of Orders"
+  ) +
+  theme_minimal()
+```
+
+
+#----------------------------------
+
+
+```{r}
+summary(fixedCountries$Ship.Date)
+
+```
+
+
+```{r}
+ggplot(fixedCountries, aes(x = Ship.Date)) +
+  geom_line(stat = "count", color = "red", linewidth = .05) +  # Count orders per date
+  labs(
+    title = "Orders Over Time (Check for Gaps/Spikes)",
+    x = "Ship Date",
+    y = "Number of Orders"
+  ) +
+  theme_minimal()
+
+channel_counts <- fixedCountries %>%
+  count(Ship.Date) %>%
+  arrange(desc(n))  # Sort by frequency (descending)
+
+ggplot(channel_counts, aes(x = Ship.Date, y = n)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  labs(title = "Frequency of Sales by Channel", x = "Sales Channel", y = "Count") +
+  theme_minimal()
+
+
+```
+
+
+#---------------------------------
+
+```{r}
+fixedCountries$Order.ID <- as.integer(fixedCountries$Order.ID)
+summary(fixedCountries$Order.ID)
+```
+
+#---------------------------------
+
+```{r}
+fixedCountries$Units.Sold <- as.integer(fixedCountries$Units.Sold)
+summary(fixedCountries$Units.Sold)
+```
+
+
+
+```{r}
+ggplot(fixedCountries, aes(x = Units.Sold)) +
+  geom_histogram(bins = 30, fill = "purple", color = "white") +
+  labs(title = "Distribution of Units Sold", x = "Units Sold", y = "Frequency") +
+  theme_minimal()
+```
+
+#----------------------------------
+
+
+
+```{r}
+fixedCountries$Unit.Cost <- as.numeric(fixedCountries$Unit.Cost)
+summary(fixedCountries$Unit.Cost)
+```
+
+
+```{r}
+# Boxplot for Unit.Price
+ggplot(fixedCountries, aes(y = Unit.Price)) +
+  geom_boxplot(fill = "lightgreen") +
+  labs(title = "Boxplot of Unit Price")
+
+# Scatter Plot: Unit.Price vs. Unit.Cost (should generally be above the diagonal)
+ggplot(fixedCountries, aes(x = Unit.Cost, y = Unit.Price)) +
+  geom_point(color = "blue") +
+  geom_abline(slope = 1, linetype = "dashed", color = "red") +  # Profit=0 line
+  labs(title = "Unit Price vs. Unit Cost (Check for Pricing Errors)")
+```
+
+
+#----------------------------------
+
+```{r}
+fixedCountries$Total.Cost <- as.numeric(fixedCountries$Total.Cost)
+summary(fixedCountries$Total.Cost)
+```
+
+
+```{r}
+# Boxplot
+ggplot(fixedCountries, aes(y = Total.Cost)) +
+  geom_boxplot(fill = "pink") +
+  labs(title = "Boxplot of Total Cost")
+
+# Scatter Plot: Total.Cost vs. Total.Revenue
+ggplot(fixedCountries, aes(x = Total.Cost, y = Total.Revenue)) +
+  geom_point(color = "darkgreen") +
+  geom_abline(slope = 1, linetype = "dashed", color = "red") +  # Break-even line
+  labs(title = "Total Cost vs. Total Revenue (Should Mostly Be Below Diagonal)")
+```
+
+#------------------------- Total.Revenue
+
+
+```{r}
+fixedCountries$Total.Revenue <- as.numeric(fixedCountries$Total.Revenue)
+summary(fixedCountries$Total.Revenue)
+```
+
+
+
+```{r}
+fixedCountries$Total.Profit <- as.numeric(fixedCountries$Total.Profit)
+
+fixedCountries$Total.Revenue <- ifelse(is.na(fixedCountries$Total.Revenue) & !is.na(fixedCountries$Total.Cost) & !is.na(fixedCountries$Total.Profit),
+                          fixedCountries$Total.Profit + fixedCountries$Total.Cost,
+                          fixedCountries$Total.Revenue)
+
+summary(fixedCountries$Total.Revenue)
+```
+
+
+```{r}
+# Histogram
+ggplot(fixedCountries, aes(x = Total.Revenue)) +
+  geom_histogram(bins = 30, fill = "steelblue") +
+  labs(title = "Distribution of Total Revenue")
+
+# Time Series (if Order.Date exists)
+fixedCountries$Order.Date <- as.Date(fixedCountries$Order.Date)  # Convert to date
+ggplot(fixedCountries, aes(x = Order.Date, y = Total.Revenue)) +
+  geom_line(color = "darkred") +
+  labs(title = "Total Revenue Over Time")
+```
+
+#------------------------- Unit.Price
+
+
+
+
+```{r}
+fixedCountries$Unit.Price <- as.numeric(fixedCountries$Unit.Price)
+summary(fixedCountries$Unit.Price)
+```
+
+
+
+```{r}
+fixedCountries$Unit.Price <- ifelse(
+  is.na(fixedCountries$Unit.Price) & 
+  !is.na(fixedCountries$Total.Revenue) & 
+  !is.na(fixedCountries$Units.Sold),
+  fixedCountries$Total.Revenue / fixedCountries$Units.Sold,  # Calculate Unit.Price
+  fixedCountries$Unit.Price  # Keep original value if not NA
+)
+
+summary(fixedCountries$Unit.Price)
+```
+
+
+```{r}
+# Boxplot for Unit.Price
+ggplot(fixedCountries, aes(y = Unit.Price)) +
+  geom_boxplot(fill = "lightgreen") +
+  labs(title = "Boxplot of Unit Price")
+
+# Scatter Plot: Unit.Price vs. Unit.Cost (should generally be above the diagonal)
+ggplot(fixedCountries, aes(x = Unit.Cost, y = Unit.Price)) +
+  geom_point(color = "blue") +
+  geom_abline(slope = 1, linetype = "dashed", color = "red") +  # Profit=0 line
+  labs(title = "Unit Price vs. Unit Cost (Check for Pricing Errors)")
+```
+
+
+#------------------------- Total.Profit
+
+```{r}
+fixedCountries$Total.Profit <- as.numeric(fixedCountries$Total.Profit)
+summary(fixedCountries$Total.Profit)
+```
+
+```{r}
+fixedCountries$Total.Profit <- ifelse(is.na(fixedCountries$Total.Profit) & !is.na(fixedCountries$Total.Revenue) & !is.na(fixedCountries$Total.Cost),
+                          fixedCountries$Total.Revenue - fixedCountries$Total.Cost,
+                          fixedCountries$Total.Profit)
+
+summary(fixedCountries$Total.Profit)
+
+```
+
+
+```{r}
+
+# Boxplot (identify extreme values)
+ggplot(fixedCountries, aes(y = Total.Profit)) +
+  geom_boxplot(fill = "skyblue") +
+  labs(title = "Boxplot of Total Profit (Outlier Detection)")
+
+# Histogram (check distribution)
+ggplot(fixedCountries, aes(x = Total.Profit)) +
+  geom_histogram(bins = 30, fill = "purple") +
+  labs(title = "Distribution of Total Profit")
+
+# Density plot (smooth distribution)
+ggplot(fixedCountries, aes(x = Total.Profit)) +
+  geom_density(fill = "orange", alpha = 0.7) +
+  labs(title = "Density of Total Profit")
+```
+
+
+#-------------------------
+
 
 
 
