@@ -260,7 +260,8 @@ aggregate(Total.Profit ~ Region + X, data = sales.df, FUN = mean, na.rm = TRUE)
 Cosmetics
 Personal Care
 ```{r e}
-#Note that we will use the same seasons for all regions. #Winter is December, January and February
+#Note that we will use the same seasons for all regions, and assume typical Northern Hemisphere Seasons where, generally
+#Winter is December, January and February
 #Spring is March, April and May
 #Summer is June, July and August
 #Autumn is September, October, November
@@ -286,4 +287,8 @@ maxcos <- seasonsales$Season[which.max(seasonsales$Total.Revenue[seasonsales$X =
 maxcare <- seasonsales$Season[which.max(seasonsales$Total.Revenue[seasonsales$X == "Personal Care"])]
 
 cat("Highest spending on cosmetics was in", maxcos, "and highest spending on personal care was in", maxcare)
+```
+# Find the monthly average units sold for Personal Care, Cosmetics and Beverages and plot a series graph for ONE year . Discuss the resulting visualization.
+```{r f}
+
 ```
