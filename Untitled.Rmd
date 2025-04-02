@@ -205,3 +205,14 @@ cosmeticsavg <- mean(cosmeticsdata$Total.Revenue, na.rm = TRUE)
 
 cat("The average money spent on Personal care is", careavg, "while the average spent on Cosmetics is", cosmeticsavg)
 ```
+# In which country do people use the most cosmetics? 
+
+```{r b}
+#Convert Revenue to numeric
+cosmeticsdata$Units.Sold <- as.numeric(cosmeticsdata$Units.Sold)
+
+cosmeticsum <- aggregate(Units.Sold ~ Country, data = cosmeticsdata, FUN = sum, na.rm = TRUE)
+
+cosmax <- cosmeticsum[which.max(cosmeticsum$Units.Sold), ]
+cat("People use the most cosmetics in", cosmax$Country)
+```
