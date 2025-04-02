@@ -15,7 +15,7 @@ understanding of how to approach a key segment of their market, vacationers
 ```{r setup}
 #install.packages(c("dplyr", "tidyr", "ggplot2", "plotly", "tm"))
 #install.packages("corrplot")
-install.packages(c("SnowballC","syuzhet","wordcloud","wordcloud2","RColorBrewer"))
+#install.packages(c("SnowballC","syuzhet","wordcloud","wordcloud2","RColorBrewer"))
 
 
 library(dplyr)
@@ -176,9 +176,32 @@ cat("The most common sentiment in Trinidad and Tobago is", most)
 
 ```
 
-```{r}
-the_tweets.df = read.csv("sales_data03.csv", stringsAsFactors = FALSE)
+## Analysis
+
+
+# What is the average amount spent on Personal Care vs. Cosmetics in each region?
+
+```{r a}
+
+#Clean up data
+rm(list=ls())
+options(scipen=9999)
+
+sales.df = read.csv("sales_data03.csv", stringsAsFactors = FALSE)
+
+
+#Convert Revenue to numeric
+sales.df$Total.Revenue <- as.numeric(sales.df$Total.Revenue)
+
+#Create dataframes for Personal Care and Cosmetics
+caredata <- subset(sales.df, X == "Personal Care")
+
+
+cosmeticsdata <- subset(sales.df, X == "Cosmetics")
+
+
+careavg <- mean(caredata$Total.Revenue, na.rm = TRUE)
+cosmeticsavg <- mean(cosmeticsdata$Total.Revenue, na.rm = TRUE)
+
+cat("The average money spent on Personal care is", careavg, "while the average spent on Cosmetics is", cosmeticsavg)
 ```
-
-
-
