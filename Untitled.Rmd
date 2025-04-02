@@ -211,8 +211,41 @@ cat("The average money spent on Personal care is", careavg, "while the average s
 #Convert Revenue to numeric
 cosmeticsdata$Units.Sold <- as.numeric(cosmeticsdata$Units.Sold)
 
+#Get sums the units sold in each country
 cosmeticsum <- aggregate(Units.Sold ~ Country, data = cosmeticsdata, FUN = sum, na.rm = TRUE)
 
+#Gets the data for the country with the maximum units sold
 cosmax <- cosmeticsum[which.max(cosmeticsum$Units.Sold), ]
 cat("People use the most cosmetics in", cosmax$Country)
+```
+# In 2016, which product had the highest and lowest quantity sold across each region?
+
+```{r c}
+#Set datatypes
+sales.df$Order.Date <- as.Date(sales.df$Order.Date, format = "%d/%m/%Y")
+sales.df$Units.Sold <- as.numeric(sales.df$Units.Sold)
+
+#Create subset of data from 2016
+data2016 <- subset(sales.df, format(Order.Date, "%Y") == "2016")
+
+# Compute total units sold per region and product
+total <- aggregate(Units.Sold ~ Region + X, data = data2016, sum, na.rm = TRUE)
+
+# Split data by Region
+byregions <- split(total, total$Region)
+
+# Find max and min in each region
+hilo <- lapply(byregions, function(df) {
+  data.frame(
+    Region = unique(df$Region),
+    Highest.Sold = df$X[which.max(df$Units.Sold)],
+    Lowest.Sold = df$X[which.min(df$Units.Sold)]
+  )
+})
+
+# Combine results into a dataframe
+result_df <- do.call(rbind, highest_lowest)
+
+print(result_df)
+
 ```
