@@ -228,13 +228,14 @@ sales.df$Units.Sold <- as.numeric(sales.df$Units.Sold)
 #Create subset of data from 2016
 data2016 <- subset(sales.df, format(Order.Date, "%Y") == "2016")
 
-# Compute total units sold per region and product
+#Find total per region and per product
 total <- aggregate(Units.Sold ~ Region + X, data = data2016, sum, na.rm = TRUE)
 
-# Split data by Region
+#Split data by regions
 byregions <- split(total, total$Region)
 
-# Find max and min in each region
+#Create a dataframe with the maximums and minimums found from byregions
+
 hilo <- lapply(byregions, function(df) {
   data.frame(
     Region = unique(df$Region),
@@ -243,9 +244,15 @@ hilo <- lapply(byregions, function(df) {
   )
 })
 
-# Combine results into a dataframe
-result_df <- do.call(rbind, highest_lowest)
+hilo <- do.call(rbind, hilo)
+print(hilo)
 
-print(result_df)
+```
+# What is the average profit for each item by region? 
 
+```{r d}
+#Set datatypes
+sales.df$Total.Profit <- as.numeric(sales.df$Total.Profit)
+
+aggregate(Total.Profit ~ Region + X, data = sales.df, FUN = mean, na.rm = TRUE)
 ```
