@@ -256,3 +256,34 @@ sales.df$Total.Profit <- as.numeric(sales.df$Total.Profit)
 
 aggregate(Total.Profit ~ Region + X, data = sales.df, FUN = mean, na.rm = TRUE)
 ```
+# In which of the seasons (Spring, Summer, Autumn, Winter) do people spend the most on:  
+Cosmetics
+Personal Care
+```{r e}
+#Note that we will use the same seasons for all regions. #Winter is December, January and February
+#Spring is March, April and May
+#Summer is June, July and August
+#Autumn is September, October, November
+
+#Set datatypes
+sales.df$Month <- as.numeric(format(sales.df$Order.Date, "%m"))
+
+#Create bins labelled as seasons, and assign months to seasons
+sales.df$Season <- cut(sales.df$Month,
+                       breaks = c(0, 2, 5, 8, 11, 12),
+                       labels = c("Winter", "Spring", "Summer", "Autumn", "Winter"),
+                       include.lowest = TRUE, right = TRUE)
+
+#Create an aggregate of revenue by season
+seasonsales <- aggregate(Total.Revenue ~ Season + X, data = sales.df[sales.df$X %in% c("Cosmetics", "Personal Care"), ], sum, na.rm = TRUE)
+
+
+#Set datatypes
+seasonsales$Season <- as.character(seasonsales$Season)
+
+#Get maximums
+maxcos <- seasonsales$Season[which.max(seasonsales$Total.Revenue[seasonsales$X == "Cosmetics"])]
+maxcare <- seasonsales$Season[which.max(seasonsales$Total.Revenue[seasonsales$X == "Personal Care"])]
+
+cat("Highest spending on cosmetics was in", maxcos, "and highest spending on personal care was in", maxcare)
+```
