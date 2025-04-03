@@ -313,19 +313,37 @@ Total Revenue and Total Profit are x correlated
 Total Cost and Total Profit are x correlated
 ```{r g}
 #Set datatypes
-sales.df <- sales.df %>% select(Total.Profit, Units.Sold, Unit.Price, Unit.Cost, Total.Revenue, Total.Cost) %>%mutate(across(everything(), as.numeric))
+salesg.df <- sales.df %>% select(Total.Profit, Units.Sold, Unit.Price, Unit.Cost, Total.Revenue, Total.Cost) %>%mutate(across(everything(), as.numeric))
 
 #Create correlation matrix
-num_cols <- sapply(sales.df, is.numeric)
-cor_matrix <- cor(sales.df[, num_cols], use = "complete.obs")
+num_cols <- sapply(salesg.df, is.numeric)
+cor_matrix <- cor(salesg.df[, num_cols], use = "complete.obs")
 profit_corr <- cor_matrix["Total.Profit", , drop = FALSE]
 
+#Visualize correlation with Profit
 corrplot(profit_corr, method = "color")
 
 #Check correlations
-cor(sales.df$Units.Sold,sales.df$Total.Profit)
-cor(sales.df$Unit.Price,sales.df$Total.Profit)
-cor(sales.df$Unit.Cost,sales.df$Total.Profit)
-cor(sales.df$Total.Revenue,sales.df$Total.Profit)
-cor(sales.df$Total.Cost,sales.df$Total.Profit)
+cor(salesg.df$Units.Sold,sales.df$Total.Profit)
+cor(salesg.df$Unit.Price,sales.df$Total.Profit)
+cor(salesg.df$Unit.Cost,sales.df$Total.Profit)
+cor(salesg.df$Total.Revenue,sales.df$Total.Profit)
+cor(salesg.df$Total.Cost,sales.df$Total.Profit)
+```
+
+# Based on correlation from part (g), build a predictive model that can be used to predict Total.Profit. Determine the accuracy of the model and show the result of a sample set of predictions for data not included in the given dataset.
+```{r h}
+#Split data into training and testing
+set.seed(101)
+train <- (sample(1:nrow(sales.df),nrow(sales.df)*0.8))
+training <- sales.df[train,]
+testing <- sales.df[-train,]
+
+#Model
+result <- result <- lm(Total.Profit ~ Units.Sold + Unit.Price + Unit.Cost + Total.Revenue + Total.Cost, data = sales.df)
+summary(result)
+
+#Accuracy
+testing$predictions <- as.integer(predict(result,testing))
+sum(ifelse(abs(testing$Total.Profit-testing$predictions)<=5,1,0))/nrow(testing)*100
 ```
