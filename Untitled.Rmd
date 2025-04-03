@@ -15,6 +15,9 @@ understanding of how to approach a key segment of their market, vacationers
 ```{r setup}
 #install.packages(c("dplyr", "tidyr", "ggplot2", "plotly", "tm"))
 #install.packages("corrplot")
+#install.packages(c("dplyr", "tidyr", "ggplot2", "plotly", "tm"))
+#install.packages("corrplot")
+#install.packages(c("SnowballC","syuzhet","wordcloud","wordcloud2","RColorBrewer"))
 
 library(dplyr)
 library(tidyr)
@@ -22,9 +25,163 @@ library(ggplot2)
 library(plotly)
 library(tm)
 library(corrplot)
+library(SnowballC)
+library(syuzhet)
+library(wordcloud)
+library(wordcloud2)
+library(RColorBrewer)
 
 
 ```
+
+
+
+## Part 1
+
+First we will load in traveler data, and create dataframes for three Caribbean countries: Jamaica, The Bahamas and Trinidad and Tobego
+```{r load data}
+
+#Clean up data
+rm(list=ls())
+options(scipen=9999)
+
+#Load in traveler data
+tdata <- read.csv("traveler_reviews.csv")
+head(tdata, 20)
+
+#Create subsets of the data for Jamaica, The Bahamas and Trinidad
+jam <- subset(tdata, Country == "Jamaica")
+head(jam)
+baha <- subset(tdata, Country == "The Bahamas")
+head(baha)
+trini <- subset(tdata, Country == "Trinidad and Tobago")
+head(trini)
+```
+## Wordclouds
+
+# The Bahamas
+```{r Bahamas wordcloud}
+#Get reviews for wordclouds
+baha_rev <- baha$ReviewText
+
+#Convert to corpus and convert to lowercase
+btext <- Corpus(VectorSource(baha_rev))
+btext <- tm_map(btext, content_transformer(tolower))
+
+
+#Remove stopwords
+btext <- tm_map(btext, removeWords, c(stopwords("english"), "and", "or","hotel"))
+
+
+#Create wordcloud
+btext.dtm <- TermDocumentMatrix(btext)
+
+btext.matrix <- as.matrix(btext.dtm)
+
+bwords <- sort(rowSums(btext.matrix), decreasing=TRUE)
+
+btext.df <- data.frame(word = names(bwords),freq=bwords)
+wordcloud2(data=btext.df, size = 0.20, shape="ellipse")
+
+```
+# Jamaica 
+
+```{r Jamaica wordcloud}
+#Get reviews for wordclouds
+jam_rev <- jam$ReviewText
+
+#Convert to corpus and convert to lowercase
+jtext <- Corpus(VectorSource(jam_rev))
+jtext <- tm_map(jtext, content_transformer(tolower))
+
+#Remove stopwords
+jtext <- tm_map(jtext, removeWords, c(stopwords("english"), "and", "or","hotel"))
+
+#Create wordcloud
+jtext.dtm <- TermDocumentMatrix(jtext)
+
+jtext.matrix <- as.matrix(jtext.dtm)
+
+jwords <- sort(rowSums(jtext.matrix), decreasing=TRUE)
+
+jtext.df <- data.frame(word = names(jwords),freq=jwords)
+wordcloud2(data=jtext.df, size = 0.20, shape="ellipse")
+```
+# Trinidad
+```{r Trinidad}
+#Get reviews for wordclouds
+trini_rev <- trini$ReviewText
+head(trini_rev)
+
+#Convert to corpus and convert to lowercase
+ttext <- Corpus(VectorSource(trini_rev))
+ttext <- tm_map(ttext, content_transformer(tolower))
+
+#Remove stopwords
+ttext <- tm_map(ttext, removeWords, c(stopwords("english"), "and", "or","hotel"))
+
+#Create wordcloud
+ttext.dtm <- TermDocumentMatrix(ttext)
+
+ttext.matrix <- as.matrix(ttext.dtm)
+
+twords <- sort(rowSums(ttext.matrix), decreasing=TRUE)
+
+ttext.df <- data.frame(word = names(twords),freq=twords)
+wordcloud2(data=ttext.df, size = 0.20, shape="ellipse")
+```
+## Wordcloud Comparisons
+Based on the word clouds, it is apparent that most reviews for Jamaica and Trinidad and Tobego are about the hotel room, since the largest word in their wordclouds is "room". On the other hand, most reviews in the Bahamas discuss "breakfast"
+
+## Sentiment Analysis for each Country
+
+# Bahamas
+
+```{r bahamas sentiment }
+#Get sentiments and add to table
+bsent <- get_nrc_sentiment(baha$ReviewText)
+bvibes <- cbind(baha, bsent)
+head(bvibes)
+
+#Determine dominant sentiment
+count <- colSums(bsent)
+most <- names(count)[which.max(count)]
+cat("The most common sentiment in The Bahamas is", most)
+
+```
+
+#Jamaica
+
+```{r jamaica sentiment }
+#Get sentiments and add to table
+jsent <- get_nrc_sentiment(jam$ReviewText)
+jvibes <- cbind(jam, jsent)
+head(jvibes)
+
+#Determine dominant sentiment
+count <- colSums(jsent)
+most <- names(count)[which.max(count)]
+cat("The most common sentiment in Jamaica is", most)
+
+```
+
+#Trinidad and Tobego
+
+```{r trinidad sentiment }
+#Get sentiments and add to table
+tsent <- get_nrc_sentiment(trini$ReviewText)
+tvibes <- cbind(trini, tsent)
+head(tvibes)
+
+#Determine dominant sentiment
+count <- colSums(tsent)
+most <- names(count)[which.max(count)]
+cat("The most common sentiment in Trinidad and Tobago is", most)
+
+```
+
+
+#-------------PART 2
 
 #------------- Deleting stored Objects and Importing csv file 
 
@@ -33,17 +190,10 @@ library(corrplot)
 
 rm(list=ls())
 options(scipen=9999)
-
-tdata <- read.csv("traveler_reviews.csv")
-head(tdata)
-```
-
-
-
-```{r}
 sales.df <- read.csv("sales_data03.csv", stringsAsFactors = FALSE)
-```
+head(sales.df)
 
+```
 #-------------- Deleting rows entirely consisting of "", NA or "k"s. 
 
 ```{r}
@@ -485,7 +635,7 @@ ggplot(fixedCountries, aes(y = Unit.Price)) +
 # Scatter Plot: Unit.Price vs. Unit.Cost (should generally be above the diagonal)
 ggplot(fixedCountries, aes(x = Unit.Cost, y = Unit.Price)) +
   geom_point(color = "blue") +
-  geom_abline(slope = 1, linetype = "dashed", color = "red") +  # Profit=0 line
+  geom_abline(slope = .6, linetype = "dashed", color = "red") +  # Profit=0 line
   labs(title = "Unit Price vs. Unit Cost (Check for Pricing Errors)")
 ```
 
@@ -508,7 +658,7 @@ ggplot(fixedCountries, aes(y = Total.Cost)) +
 # Scatter Plot: Total.Cost vs. Total.Revenue
 ggplot(fixedCountries, aes(x = Total.Cost, y = Total.Revenue)) +
   geom_point(color = "darkgreen") +
-  geom_abline(slope = 1, linetype = "dashed", color = "red") +  # Break-even line
+  geom_abline(slope = .05, linetype = "dashed", color = "red") +  # Break-even line
   labs(title = "Total Cost vs. Total Revenue (Should Mostly Be Below Diagonal)")
 ```
 
@@ -628,5 +778,189 @@ ggplot(fixedCountries, aes(x = Total.Profit)) +
 #-------------------------
 
 
+```{r}
+cleanData.df = fixedCountries
+```
+
+
+
+#------------------------ PART 3
+
+## Analysis
+
+
+# What is the average amount spent on Personal Care vs. Cosmetics in each region?
+
+```{r a}
+
+#Clean up data
+#rm(list=ls())
+#options(scipen=9999)
+
+sales.df = cleanData.df
+
+
+#Convert Revenue to numeric
+sales.df$Total.Revenue <- as.numeric(sales.df$Total.Revenue)
+
+#Create dataframes for Personal Care and Cosmetics
+caredata <- subset(sales.df, X == "Personal Care")
+
+
+cosmeticsdata <- subset(sales.df, X == "Cosmetics")
+
+
+careavg <- mean(caredata$Total.Revenue, na.rm = TRUE)
+cosmeticsavg <- mean(cosmeticsdata$Total.Revenue, na.rm = TRUE)
+
+cat("The average money spent on Personal care is", careavg, "while the average spent on Cosmetics is", cosmeticsavg)
+```
+# In which country do people use the most cosmetics? 
+
+```{r b}
+#Convert Revenue to numeric
+cosmeticsdata$Units.Sold <- as.numeric(cosmeticsdata$Units.Sold)
+
+#Get sums the units sold in each country
+cosmeticsum <- aggregate(Units.Sold ~ Country, data = cosmeticsdata, FUN = sum, na.rm = TRUE)
+
+#Gets the data for the country with the maximum units sold
+cosmax <- cosmeticsum[which.max(cosmeticsum$Units.Sold), ]
+cat("People use the most cosmetics in", cosmax$Country)
+```
+# In 2016, which product had the highest and lowest quantity sold across each region?
+
+```{r c}
+#Set datatypes
+sales.df$Order.Date <- as.Date(sales.df$Order.Date, format = "%d/%m/%Y")
+sales.df$Units.Sold <- as.numeric(sales.df$Units.Sold)
+
+#Create subset of data from 2016
+data2016 <- subset(sales.df, format(Order.Date, "%Y") == "2016")
+
+#Find total per region and per product
+total <- aggregate(Units.Sold ~ Region + X, data = data2016, sum, na.rm = TRUE)
+
+#Split data by regions
+byregions <- split(total, total$Region)
+
+#Create a dataframe with the maximums and minimums found from byregions
+
+hilo <- lapply(byregions, function(df) {
+  data.frame(
+    Region = unique(df$Region),
+    Highest.Sold = df$X[which.max(df$Units.Sold)],
+    Lowest.Sold = df$X[which.min(df$Units.Sold)]
+  )
+})
+
+hilo <- do.call(rbind, hilo)
+print(hilo)
+
+```
+# What is the average profit for each item by region? 
+
+```{r d}
+#Set datatypes
+sales.df$Total.Profit <- as.numeric(sales.df$Total.Profit)
+
+aggregate(Total.Profit ~ Region + X, data = sales.df, FUN = mean, na.rm = TRUE)
+```
+# In which of the seasons (Spring, Summer, Autumn, Winter) do people spend the most on:  
+Cosmetics
+Personal Care
+```{r e}
+#Note that we will use the same seasons for all regions, and assume typical Northern Hemisphere Seasons where, generally
+#Winter is December, January and February
+#Spring is March, April and May
+#Summer is June, July and August
+#Autumn is September, October, November
+
+#Set datatypes
+sales.df$Month <- as.numeric(format(sales.df$Order.Date, "%m"))
+
+#Create bins labelled as seasons, and assign months to seasons
+sales.df$Season <- cut(sales.df$Month,
+                       breaks = c(0, 2, 5, 8, 11, 12),
+                       labels = c("Winter", "Spring", "Summer", "Autumn", "Winter"),
+                       include.lowest = TRUE, right = TRUE)
+
+#Create an aggregate of revenue by season
+seasonsales <- aggregate(Total.Revenue ~ Season + X, data = sales.df[sales.df$X %in% c("Cosmetics", "Personal Care"), ], sum, na.rm = TRUE)
+
+
+#Set datatypes
+seasonsales$Season <- as.character(seasonsales$Season)
+
+#Get maximums
+maxcos <- seasonsales$Season[which.max(seasonsales$Total.Revenue[seasonsales$X == "Cosmetics"])]
+maxcare <- seasonsales$Season[which.max(seasonsales$Total.Revenue[seasonsales$X == "Personal Care"])]
+
+cat("Highest spending on cosmetics was in", maxcos, "and highest spending on personal care was in", maxcare)
+```
+# Find the monthly average units sold for Personal Care, Cosmetics and Beverages and plot a series graph for ONE year . Discuss the resulting visualization.
+```{r f}
+#Remove days
+data2016$YearMonth <- format(data2016$Order.Date, "%Y-%m")
+
+#Create subset with only the needed data
+data2016filter<- data2016[data2016$X %in% c("Personal Care", "Cosmetics", "Beverages"), ]
+
+#Find monthly average
+monthlyavg <- aggregate(Units.Sold ~ YearMonth + X, data = data2016filter, FUN = mean, na.rm = TRUE)
+
+#Plot line graph
+ggplot(monthlyavg, aes(x = YearMonth, y = Units.Sold, color = X, group = X)) + geom_line() + labs(title = "Monthly Average Units Sold", x = "Month", y = "Units Sold") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+# Determine correlation between Total.Profit and the other features (include visualizations) in the dataset.
+
+Units Sold and Total Profit are x correlated
+Unit Price and Total Profit are x correlated
+Unit Cost and Total Profit are x correlated
+Total Revenue and Total Profit are x correlated
+Total Cost and Total Profit are x correlated
+```{r g}
+#Set datatypes
+salesg.df <- sales.df %>% select(Total.Profit, Units.Sold, Unit.Price, Unit.Cost, Total.Revenue, Total.Cost) %>%mutate(across(everything(), as.numeric))
+
+#Create correlation matrix
+num_cols <- sapply(salesg.df, is.numeric)
+cor_matrix <- cor(salesg.df[, num_cols], use = "complete.obs")
+profit_corr <- cor_matrix["Total.Profit", , drop = FALSE]
+
+#Visualize correlation with Profit
+corrplot(profit_corr, method = "color")
+
+#Check correlations
+cor(salesg.df$Units.Sold,sales.df$Total.Profit)
+cor(salesg.df$Unit.Price,sales.df$Total.Profit)
+cor(salesg.df$Unit.Cost,sales.df$Total.Profit)
+cor(salesg.df$Total.Revenue,sales.df$Total.Profit)
+cor(salesg.df$Total.Cost,sales.df$Total.Profit)
+```
+
+# Based on correlation from part (g), build a predictive model that can be used to predict Total.Profit. Determine the accuracy of the model and show the result of a sample set of predictions for data not included in the given dataset.
+```{r h}
+#Split data into training and testing
+set.seed(101)
+train <- (sample(1:nrow(sales.df),nrow(sales.df)*0.8))
+training <- sales.df[train,]
+testing <- sales.df[-train,]
+
+#Model
+result <- result <- lm(Total.Profit ~ Units.Sold + Unit.Price + Unit.Cost + Total.Revenue + Total.Cost, data = sales.df)
+summary(result)
+
+#Accuracy
+testing$predictions <- as.integer(predict(result,testing))
+sum(ifelse(abs(testing$Total.Profit-testing$predictions)<=5,1,0))/nrow(testing)*100
+```
+
+
+# Explain how this model may help the investors make better decisions.
+
+Investors could use this model to predict future profits. This is especially useful when deciding how much of a product should be purchased, and how that may translate to future profits
 
 
