@@ -299,7 +299,33 @@ data2016filter<- data2016[data2016$X %in% c("Personal Care", "Cosmetics", "Bever
 #Find monthly average
 monthlyavg <- aggregate(Units.Sold ~ YearMonth + X, data = data2016filter, FUN = mean, na.rm = TRUE)
 
-
+#Plot line graph
 ggplot(monthlyavg, aes(x = YearMonth, y = Units.Sold, color = X, group = X)) + geom_line() + labs(title = "Monthly Average Units Sold", x = "Month", y = "Units Sold") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+# Determine correlation between Total.Profit and the other features (include visualizations) in the dataset.
+
+Units Sold and Total Profit are x correlated
+Unit Price and Total Profit are x correlated
+Unit Cost and Total Profit are x correlated
+Total Revenue and Total Profit are x correlated
+Total Cost and Total Profit are x correlated
+```{r g}
+#Set datatypes
+sales.df <- sales.df %>% select(Total.Profit, Units.Sold, Unit.Price, Unit.Cost, Total.Revenue, Total.Cost) %>%mutate(across(everything(), as.numeric))
+
+#Create correlation matrix
+num_cols <- sapply(sales.df, is.numeric)
+cor_matrix <- cor(sales.df[, num_cols], use = "complete.obs")
+profit_corr <- cor_matrix["Total.Profit", , drop = FALSE]
+
+corrplot(profit_corr, method = "color")
+
+#Check correlations
+cor(sales.df$Units.Sold,sales.df$Total.Profit)
+cor(sales.df$Unit.Price,sales.df$Total.Profit)
+cor(sales.df$Unit.Cost,sales.df$Total.Profit)
+cor(sales.df$Total.Revenue,sales.df$Total.Profit)
+cor(sales.df$Total.Cost,sales.df$Total.Profit)
 ```
