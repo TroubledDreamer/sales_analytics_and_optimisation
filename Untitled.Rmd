@@ -290,5 +290,16 @@ cat("Highest spending on cosmetics was in", maxcos, "and highest spending on per
 ```
 # Find the monthly average units sold for Personal Care, Cosmetics and Beverages and plot a series graph for ONE year . Discuss the resulting visualization.
 ```{r f}
+#Remove days
+data2016$YearMonth <- format(data2016$Order.Date, "%Y-%m")
 
+#Create subset with only the needed data
+data2016filter<- data2016[data2016$X %in% c("Personal Care", "Cosmetics", "Beverages"), ]
+
+#Find monthly average
+monthlyavg <- aggregate(Units.Sold ~ YearMonth + X, data = data2016filter, FUN = mean, na.rm = TRUE)
+
+
+ggplot(monthlyavg, aes(x = YearMonth, y = Units.Sold, color = X, group = X)) + geom_line() + labs(title = "Monthly Average Units Sold", x = "Month", y = "Units Sold") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
