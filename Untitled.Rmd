@@ -355,44 +355,32 @@ print(uniqueValue)
 
 ```{r}
 
-library(dplyr)
 
-# Convert to lowercase to avoid case issues
 fixedCountries$Sales.Channel <- tolower(fixedCountries$Sales.Channel)
 
-# Replace only incorrect values ("yes" and "") with NA, keeping "online" and "offline"
 fixedCountries$Sales.Channel <- ifelse(fixedCountries$Sales.Channel %in% c("yes", ""), NA, fixedCountries$Sales.Channel)
 
-# Ensure Sales.Channel is a factor
 fixedCountries$Sales.Channel <- factor(fixedCountries$Sales.Channel, levels = c("offline", "online"))
 
-# ✅ Check the data before modeling
 print(table(fixedCountries$Sales.Channel, useNA = "always"))
 
-# Only run the model if there are enough unique values
 train_data <- fixedCountries %>% filter(!is.na(Sales.Channel))
 
 if (length(unique(train_data$Sales.Channel)) > 1) {
-    # Train logistic regression model
     model <- glm(Sales.Channel ~ Country + X, data = train_data, family = binomial, na.action = na.exclude)
 
-    # Identify missing values
     missing_indices <- which(is.na(fixedCountries$Sales.Channel))
     fixedCountries$PredictedProb <- predict(model, newdata = fixedCountries, type = "response")
 
-    # Replace missing values based on predicted probability
     fixedCountries$Sales.Channel[missing_indices] <- ifelse(fixedCountries$PredictedProb[missing_indices] > 0.5, "online", "offline")
 
-    # Convert to factor again
     fixedCountries$Sales.Channel <- factor(fixedCountries$Sales.Channel, levels = c("offline", "online"))
 
-    # Remove the PredictedProb column
     fixedCountries <- fixedCountries %>% select(-PredictedProb)
 } else {
     warning("Not enough unique levels in Sales.Channel to fit the model. Check data cleaning steps!")
 }
 
-# ✅ Check the cleaned data
 print(table(fixedCountries$Sales.Channel, useNA = "always"))
 
 ```
@@ -482,7 +470,46 @@ uniqueValues <- unique(fixedCountries[,"X"])
 print(uniqueValues)
 ```
 
+#-------------------------- It was noticed that Unit.Cost only relate to one type of item. Using this we are able to look at the price
+# to figure out the X eg 117.11 is only related to cereal
+
 ```{r}
+cost_to_product <- fixedCountries %>%
+  filter(X != "None" & !is.na(X) & X != "") %>%
+  group_by(Unit.Cost) %>%
+  summarize(
+    potential_product = first(X), 
+    product_count = n_distinct(X)  
+  ) %>%
+  filter(product_count == 1) 
+
+fixedCountries <- fixedCountries %>%
+  left_join(cost_to_product, by = "Unit.Cost") %>%
+  mutate(
+    X = case_when(
+      X == "None" & !is.na(potential_product) ~ potential_product,
+      TRUE ~ X
+    )
+  ) %>%
+  select(-potential_product, -product_count) 
+
+
+fixedCountries <- fixedCountries %>%
+  mutate(X = ifelse(X == "None", "Other", X))
+```
+
+
+```{r}
+summary(fixedCountries$X)
+uniqueValues <- unique(fixedCountries[,"X"])
+print(uniqueValues)
+```
+
+
+
+```{r}
+
+
 product_counts <- fixedCountries %>%
   count(X) 
 
@@ -495,6 +522,8 @@ ggplot(product_counts, aes(x = reorder(X, -n), y = n)) +
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-labels
+
+
 ```
 
 
@@ -538,7 +567,7 @@ channel_counts <- fixedCountries %>%
 
 ggplot(channel_counts, aes(x = Order.Priority, y = n)) +
   geom_bar(stat = "identity", fill = "orange") +
-  labs(title = "Frequency of Sales by Channel", x = "Order.Priority", y = "Count") +
+  labs(title = "Frequency of Sales by Order.Priority", x = "Order.Priority", y = "Count") +
   theme_minimal()
 ```
 
@@ -575,7 +604,7 @@ summary(fixedCountries$Ship.Date)
 ggplot(fixedCountries, aes(x = Ship.Date)) +
   geom_line(stat = "count", color = "red", linewidth = .05) +  # Count orders per date
   labs(
-    title = "Orders Over Time (Check for Gaps/Spikes)",
+    title = "Ship.Date (Check for Gaps/Spikes)",
     x = "Ship Date",
     y = "Number of Orders"
   ) +
@@ -587,7 +616,7 @@ channel_counts <- fixedCountries %>%
 
 ggplot(channel_counts, aes(x = Ship.Date, y = n)) +
   geom_bar(stat = "identity", fill = "orange") +
-  labs(title = "Frequency of Sales by Channel", x = "Sales Channel", y = "Count") +
+  labs(title = "Frequency of Sales by Ship.Date", x = "Ship.Date", y = "Count") +
   theme_minimal()
 
 
@@ -635,7 +664,7 @@ ggplot(fixedCountries, aes(y = Unit.Price)) +
 # Scatter Plot: Unit.Price vs. Unit.Cost (should generally be above the diagonal)
 ggplot(fixedCountries, aes(x = Unit.Cost, y = Unit.Price)) +
   geom_point(color = "blue") +
-  geom_abline(slope = .6, linetype = "dashed", color = "red") +  # Profit=0 line
+  geom_abline(slope = 1, linetype = "dashed", color = "red") +  # Profit=0% line
   labs(title = "Unit Price vs. Unit Cost (Check for Pricing Errors)")
 ```
 
@@ -658,7 +687,7 @@ ggplot(fixedCountries, aes(y = Total.Cost)) +
 # Scatter Plot: Total.Cost vs. Total.Revenue
 ggplot(fixedCountries, aes(x = Total.Cost, y = Total.Revenue)) +
   geom_point(color = "darkgreen") +
-  geom_abline(slope = .05, linetype = "dashed", color = "red") +  # Break-even line
+  geom_abline(slope = .05, linetype = "dashed", color = "red") +  # For every $1 of Total.Cost, you expect $0.05 of Total.Revenue to break even.
   labs(title = "Total Cost vs. Total Revenue (Should Mostly Be Below Diagonal)")
 ```
 
@@ -696,6 +725,21 @@ fixedCountries$Order.Date <- as.Date(fixedCountries$Order.Date)  # Convert to da
 ggplot(fixedCountries, aes(x = Order.Date, y = Total.Revenue)) +
   geom_line(color = "darkred") +
   labs(title = "Total Revenue Over Time")
+
+revenue_by_product <- fixedCountries %>%
+  group_by(X) %>%
+  summarise(Total_Revenue = sum(Total.Revenue, na.rm = TRUE)) %>%
+  arrange(desc(Total_Revenue))  # Sort by highest revenue
+
+ggplot(revenue_by_product, aes(x = reorder(X, -Total_Revenue), y = Total_Revenue)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(
+    title = "Total Revenue by Product Type (X)",
+    x = "Product Type",
+    y = "Total Revenue"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-labels
 ```
 
 #------------------------- Unit.Price
