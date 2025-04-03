@@ -347,3 +347,8 @@ summary(result)
 testing$predictions <- as.integer(predict(result,testing))
 sum(ifelse(abs(testing$Total.Profit-testing$predictions)<=5,1,0))/nrow(testing)*100
 ```
+
+
+# Explain how this model may help the investors make better decisions.
+
+Investors could use this model to predict future profits. This is especially useful when deciding how much of a product should be purchased, and how that may translate to future profits
