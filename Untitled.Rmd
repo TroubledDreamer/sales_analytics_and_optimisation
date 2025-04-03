@@ -25,7 +25,10 @@ library(corrplot)
 
 
 ```
-## Part 1
+
+#------------- Deleting stored Objects and Importing csv file 
+
+
 ```{r load data}
 
 rm(list=ls())
@@ -37,12 +40,12 @@ head(tdata)
 
 
 
-
 ```{r}
 sales.df <- read.csv("sales_data03.csv", stringsAsFactors = FALSE)
 ```
 
-#Data Cleaning
+#-------------- Deleting rows entirely consisting of "", NA or "k"s. 
+
 ```{r}
 #Step 1 - Removing empty rows
 noNARow <- sales.df[rowSums(is.na(sales.df[, -1]) | sales.df[, -1] == "" | sales.df[, -1] == "k") != (ncol(sales.df) - 1), ]
@@ -50,10 +53,10 @@ noNARow <- sales.df[rowSums(is.na(sales.df[, -1]) | sales.df[, -1] == "" | sales
 ```
 
 
+#---------------- Checking how dirty the Region feature is and extracting only the valid regions
 
-#Step 2 - 
 ```{r}
-#
+
 uniqueValues <- unique(noNARow[,"Region"])
 print(uniqueValues)
 
@@ -63,12 +66,19 @@ validPlaces <- c("Sub-Saharan Africa", "Asia" , "Europe" , "Australia and Oceani
 print(validPlaces)
 ```
 
+
+#------------------- Removing extra places at the end of countries eg. "Saint Kitts and Nevis " and also getting all the countries
+
 ```{r}
-#
-noNARow$Country <- trimws(noNARow$Country) #removing extra space at the end of countries
+
+noNARow$Country <- trimws(noNARow$Country)
 uniqueValues <- unique(noNARow[,"Country"])
 print(uniqueValues)
 ```
+
+
+#------------------- As all entries under Countries are valid we can extract the missing values or the region by using domain knowledge
+#here we assign each country to their region
 
 
 ```{r}
@@ -153,6 +163,9 @@ countryRegionMap <- c(
 ```
 
 
+
+#---------------------------- Invalid Region entries are replaced with the correct Regions based on their country
+
 ```{r}
 fixedCountries <- noNARow
 fixedCountries$Region <- ifelse(noNARow$Region %in% validPlaces, noNARow$Region, countryRegionMap[noNARow$Country])
@@ -163,41 +176,34 @@ print(uniqueValues)
 
 
 
-#Step 3 - X
+#------------------------- X is reviewed but we decided to view "None" as the option "other"
+
 ```{r}
 #Note - None is one of the options
 uniqueValues <- unique(fixedCountries[,"X"])
 print(uniqueValues)
 ```
 
-#Step 4 - Sales.Channel
+#------------------------- Sales.Channel is checked on what dirty values it has.
+
 ```{r}
 #Note - Yes is one of the options
 uniqueValues <- unique(fixedCountries[,"Sales.Channel"])
 print(uniqueValues)
 fixedCountries[fixedCountries$Sales.Channel == "", ]
-
 ```
 
 ```{r}
-
-
-
-
 # Print the unique values in the Sales.Channel column to check
 uniqueValue <- unique(fixedCountries[,"Sales.Channel"])
 print(uniqueValue)
-
-
-
 ```
 
 
-
+#----------------------- Using predictions we predict if the Sales.Channel based on the country and item type
 
 
 ```{r}
-
 
 library(dplyr)
 
@@ -239,19 +245,12 @@ if (length(unique(train_data$Sales.Channel)) > 1) {
 # ✅ Check the cleaned data
 print(table(fixedCountries$Sales.Channel, useNA = "always"))
 
-
-
-
 ```
+
+#------------------------- Order.Date and Ship.Date are compared to check for errors
 
 ```{r}
 
-print(table(fixedCountries$Order.Priority, useNA = "always"))
-
-```
-
-
-```{r}
 fixedCountries$Order.Date <- as.Date(fixedCountries$Order.Date, format="%m/%d/%Y")
 fixedCountries$Ship.Date <- as.Date(fixedCountries$Ship.Date, format="%m/%d/%Y")
 
@@ -262,9 +261,11 @@ all(fixedCountries$Order.Date <= fixedCountries$Ship.Date)
 
 # Print the problematic rows
 #print(invalid_rows)
+
 ```
 
 
+#-------------------------- Region
 
 ```{r}
 summary(fixedCountries$Region)
@@ -272,7 +273,11 @@ uniqueValues <- unique(fixedCountries[,"Region"])
 print(uniqueValues)
 ```
 
+
+
+
 ```{r}
+
 product_counts <- fixedCountries %>%
   count(Region) 
 
@@ -285,17 +290,17 @@ ggplot(product_counts, aes(x = reorder(Region, -n), y = n)) +
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-labels
+
 ```
 
 
 
-#-----------------------------------------------
+#----------------------------------------------- Country
 
 ```{r}
 summary(fixedCountries$Country)
 uniqueValues <- unique(fixedCountries[,"Country"])
 print(uniqueValues)
-
 ```
 
 
@@ -319,7 +324,7 @@ ggplot(top_countries, aes(x = reorder(Country, -n), y = n)) +
 
 
 
-#---------------------------------
+#--------------------------------- X
 
 ```{r}
 summary(fixedCountries$X)
@@ -345,7 +350,7 @@ ggplot(product_counts, aes(x = reorder(X, -n), y = n)) +
 
 
 
-#----------------------------------
+#---------------------------------- Sales.Channel
 
 
 ```{r}
@@ -368,7 +373,7 @@ ggplot(channel_counts, aes(x = Sales.Channel, y = n)) +
 ```
 
 
-#-------------------------------
+#------------------------------- Order.Priority
 
 ```{r}
 summary(fixedCountries$Order.Priority)
@@ -387,7 +392,7 @@ ggplot(channel_counts, aes(x = Order.Priority, y = n)) +
   theme_minimal()
 ```
 
-#----------------------------------
+#---------------------------------- Order.Date
 
 ```{r}
 summary(fixedCountries$Order.Date)
@@ -407,7 +412,7 @@ ggplot(fixedCountries, aes(x = Order.Date)) +
 ```
 
 
-#----------------------------------
+#---------------------------------- Ship.Date
 
 
 ```{r}
@@ -439,14 +444,14 @@ ggplot(channel_counts, aes(x = Ship.Date, y = n)) +
 ```
 
 
-#---------------------------------
+#--------------------------------- Order.ID
 
 ```{r}
 fixedCountries$Order.ID <- as.integer(fixedCountries$Order.ID)
 summary(fixedCountries$Order.ID)
 ```
 
-#---------------------------------
+#--------------------------------- Units.Sold
 
 ```{r}
 fixedCountries$Units.Sold <- as.integer(fixedCountries$Units.Sold)
@@ -462,8 +467,7 @@ ggplot(fixedCountries, aes(x = Units.Sold)) +
   theme_minimal()
 ```
 
-#----------------------------------
-
+#---------------------------------- Unit.Cost
 
 
 ```{r}
@@ -486,7 +490,8 @@ ggplot(fixedCountries, aes(x = Unit.Cost, y = Unit.Price)) +
 ```
 
 
-#----------------------------------
+#---------------------------------- Total.Cost
+
 
 ```{r}
 fixedCountries$Total.Cost <- as.numeric(fixedCountries$Total.Cost)
@@ -515,6 +520,8 @@ fixedCountries$Total.Revenue <- as.numeric(fixedCountries$Total.Revenue)
 summary(fixedCountries$Total.Revenue)
 ```
 
+
+#--- Using fixedCountries$Total.Profit + fixedCountries$Total.Cost = fixedCountries$Total.Revenue to replace the NA's
 
 
 ```{r}
@@ -551,7 +558,7 @@ fixedCountries$Unit.Price <- as.numeric(fixedCountries$Unit.Price)
 summary(fixedCountries$Unit.Price)
 ```
 
-
+#--- Using fixedCountries$Total.Revenue / fixedCountries$Units.Sold = Unit.Price to replace the NA's
 
 ```{r}
 fixedCountries$Unit.Price <- ifelse(
@@ -586,6 +593,8 @@ ggplot(fixedCountries, aes(x = Unit.Cost, y = Unit.Price)) +
 fixedCountries$Total.Profit <- as.numeric(fixedCountries$Total.Profit)
 summary(fixedCountries$Total.Profit)
 ```
+
+#--- Using fixedCountries$Total.Revenue - fixedCountries$Total.Cost = Total.Profit to replace the NA's
 
 ```{r}
 fixedCountries$Total.Profit <- ifelse(is.na(fixedCountries$Total.Profit) & !is.na(fixedCountries$Total.Revenue) & !is.na(fixedCountries$Total.Cost),
