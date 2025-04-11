@@ -1,6 +1,8 @@
 ---
 title: "Assignment02"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 date: "2025-03-28"
 ---
 
@@ -39,7 +41,7 @@ library(RColorBrewer)
 ## Part 1
 
 First we will load in traveler data, and create dataframes for three Caribbean countries: Jamaica, The Bahamas and Trinidad and Tobego
-```{r load data}
+```{r}
 
 #Clean up data
 rm(list=ls())
@@ -470,7 +472,7 @@ uniqueValues <- unique(fixedCountries[,"X"])
 print(uniqueValues)
 ```
 
-#-------------------------- It was noticed that Unit.Cost only relate to one type of item. Using this we are able to look at the price
+#-------------------------- It was noticed that Unit.Cost only relates to one type of item. Using this we are able to look at the price
 # to figure out the X eg 117.11 is only related to cereal
 
 ```{r}
@@ -985,6 +987,10 @@ cor(salesg.df$Total.Revenue,sales.df$Total.Profit)
 cor(salesg.df$Total.Cost,sales.df$Total.Profit)
 ```
 
+
+
+
+
 # Based on correlation from part (g), build a predictive model that can be used to predict Total.Profit. Determine the accuracy of the model and show the result of a sample set of predictions for data not included in the given dataset.
 ```{r h}
 #Split data into training and testing
@@ -1005,6 +1011,6 @@ sum(ifelse(abs(testing$Total.Profit-testing$predictions)<=5,1,0))/nrow(testing)*
 
 # Explain how this model may help the investors make better decisions.
 
-Investors could use this model to predict future profits. This is especially useful when deciding how much of a product should be purchased, and how that may translate to future profits
+Investors could use this model to predict profits. This is especially useful when deciding how much of a product should be purchased, and how that may translate to future profits
 
 
